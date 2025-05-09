@@ -1,320 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Dằn mặt Thắng moi</title>
+  <meta charset="UTF-8">
+  <title>Bảo trì</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f2f5;
+      background: #000;
       display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    header {
-      background-color: #0084ff;
-      color: white;
-      padding: 12px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 18px;
-      flex-shrink: 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-      display: flex;
-      flex-direction: column-reverse;
-      background: #e5ddd5;
-      min-height: 0;
-      max-height: calc(100vh - 60px);
-      height: auto;
-    }
-
-    .message {
-      max-width: 75%;
-      margin-bottom: 12px;
-      padding: 0;
-      border-radius: 18px;
-      position: relative;
-      display: flex;
-      align-items: flex-start;
-      animation: slideIn 0.3s ease-out;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .message-content {
-      padding: 8px 12px;
-      border-radius: 18px;
-      display: inline-block;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-
-    .user {
-      background-color: #0084ff;
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .bot {
-      background-color: #fff;
-      color: #333;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      margin-right: 8px;
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    .message.bot .message-content {
-      font-size: 15px;
-      line-height: 1.4;
-    }
-
-    .message.user .message-content {
-      font-size: 15px;
-      line-height: 1.4;
-    }
-
-    #input-area {
-      display: flex;
+      justify-content: center;
       align-items: center;
-      border-top: 1px solid #ddd;
-      padding: 8px;
-      background: #fff;
-      flex-shrink: 0;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 10;
-      box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+      height: 100vh;
+    }
+    .sparkle-text {
+      font-size: 3em;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(90deg, #ffcc00, #ff66cc, #66ccff, #ffcc00);
+      background-size: 400% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 5s linear infinite;
+      text-shadow: 0 0 5px #fff, 0 0 10px #ff66cc, 0 0 20px #ff66cc;
     }
 
-    #message-input {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      outline: none;
-      font-size: 15px;
-      background: #f5f6f5;
-      transition: border-color 0.2s ease;
-    }
-
-    #message-input:focus {
-      border-color: #0084ff;
-    }
-
-    #send-button {
-      background-color: #0084ff;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 10px 16px;
-      margin-left: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
-
-    #send-button:hover {
-      background-color: #0073e6;
-    }
-
-    #send-button:active {
-      transform: scale(0.95);
+    @keyframes shine {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
     }
   </style>
 </head>
 <body>
-  <header>Thắng moi</header>
-  <div id="chat"></div>
-  <div id="input-area">
-    <input type="text" id="message-input" placeholder="Nhập tin nhắn..." />
-    <button id="send-button">Gửi</button>
-  </div>
-
-  <script>
-    // Lấy các phần tử DOM
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("message-input");
-    const sendBtn = document.getElementById("send-button");
-    const inputArea = document.getElementById("input-area");
-
-    // Hàm định dạng giờ
-    function getCurrentTime() {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      return `Bây giờ là ${hours}:${minutes}`;
-    }
-
-    // Danh sách câu trả lời
-    const responses = {
-      "xin chào": "Chào mày, coder tương lai! 😎",
-      "hello": "Hi, tui là Bot Tèo, sẵn sàng hỗ trợ!",
-      "mày là ai": "Tui là Bot Tèo, được Grok tạo ra để dạy mày code! 😄",
-      "game": "Game Rắn săn mồi mày làm tới đâu rồi? Khoe tui đi!",
-      "code": "Muốn học code tiếp hả? Hỏi tui gì nào, tui chỉ tận tình!",
-      "gâu gâu": "Haha, mày sủa vui ghê! Muốn học làm game không? 😄",
-      "thời tiết": "Tui chưa có API thời tiết, nhưng chắc hôm nay nắng đẹp! 😄",
-      "rắn săn mồi": "Game Rắn săn mồi của mày có hình ảnh chưa? Khoe tui đi!",
-      "điểm cao": "Wow, điểm cao quá! Mày là coder xịn quá rồi đó! 😎",
-      "tối nay ăn gì": "Ăn anh à? 😘 Thế thì tối nay anh mời mày đi ăn phở nha!",
-      "yêu": "Yêu tui hả? Tui cũng yêu mày, coder dễ thương ơi! ❤️",
-      "buồn": "Buồn hả? Để tui kể chuyện vui cho mày nghe nha! 😄 Có con mèo nào code được không?",
-      "mấy giờ": getCurrentTime,
-      "giờ": getCurrentTime,
-      "default": [
-        "Hài hước ghê! 😄 Gõ gì tui hiểu hơn đi, như 'game', 'code', hay 'tối nay ăn gì'!",
-        "Mày vui tính thật đấy! 😎 Hỏi tui gì đi, tui trả lời liền!",
-        "Hihi, tui chưa hiểu lắm, mày thử hỏi kiểu khác xem nào! 😊"
-      ],
-      "thắng là ai": "Thắng moi là thằng bảo chuyển 2 sên thì không có mà chuyển cho người ta 4 man, anh em gì không biết"
-    };
-
-    let lastInput = "";
-
-    // Hàm thêm tin nhắn
-    function addMessage(text, sender) {
-      const message = document.createElement("div");
-      message.className = "message " + sender;
-
-      const avatarSrc = sender === "bot" ? "https://i.imgur.com/8Km9tLL.png" : "https://i.imgur.com/your-avatar-url.jpg";
-      const avatar = document.createElement("img");
-      avatar.src = avatarSrc;
-      avatar.className = "avatar";
-      message.appendChild(avatar);
-
-      const content = document.createElement("div");
-      content.className = "message-content";
-      content.textContent = text;
-      message.appendChild(content);
-
-      chat.insertBefore(message, chat.firstChild);
-      chat.scrollTop = 0;
-
-      adjustChatHeight();
-    }
-
-    // Hàm điều chỉnh chiều cao khung chat
-    function adjustChatHeight() {
-      const headerHeight = document.querySelector("header").offsetHeight;
-      const inputAreaHeight = inputArea.offsetHeight;
-      const maxChatHeight = window.innerHeight - headerHeight - inputAreaHeight;
-
-      chat.style.maxHeight = `${maxChatHeight}px`;
-      chat.style.height = "auto";
-      if (chat.scrollHeight > maxChatHeight) {
-        chat.style.height = `${maxChatHeight}px`;
-      }
-      chat.scrollTop = 0;
-    }
-
-    // Hàm điều chỉnh chiều cao động khi bàn phím ảo xuất hiện
-    function adjustLayout() {
-      const windowHeight = window.innerHeight;
-      const inputAreaHeight = inputArea.offsetHeight;
-      const headerHeight = document.querySelector("header").offsetHeight;
-      const maxChatHeight = windowHeight - headerHeight - inputAreaHeight;
-
-      chat.style.maxHeight = `${maxChatHeight}px`;
-      chat.style.paddingBottom = `${inputAreaHeight}px`;
-      adjustChatHeight();
-
-      setTimeout(() => {
-        inputArea.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 100);
-    }
-
-    // Gọi hàm điều chỉnh ngay khi tải trang
-    adjustLayout();
-
-    // Lắng nghe sự kiện resize
-    window.addEventListener("resize", adjustLayout);
-
-    // Xử lý khi input được focus
-    input.addEventListener("focus", () => {
-      setTimeout(() => {
-        adjustLayout();
-        inputArea.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 700);
-    });
-
-    // Xử lý khi input mất focus
-    input.addEventListener("blur", () => {
-      adjustLayout();
-    });
-
-    // Xử lý sự kiện gửi tin nhắn
-    sendBtn.onclick = () => {
-      const text = input.value.trim();
-      if (text) {
-        addMessage(text, "user");
-
-        let reply = responses["default"];
-        for (let key in responses) {
-          if (key !== "default" && text.toLowerCase().includes(key)) {
-            reply = responses[key];
-            if (typeof reply === "function") {
-              reply = reply();
-            }
-            break;
-          }
-        }
-        if (Array.isArray(reply)) {
-          reply = reply[Math.floor(Math.random() * reply.length)];
-        }
-        if (text.toLowerCase().includes("lại đi") && lastInput.includes("game")) {
-          reply = "Haha, vẫn khoe game à? Điểm bao nhiêu rồi?";
-        }
-
-        setTimeout(() => {
-          addMessage("Bot đang gõ...", "bot");
-          setTimeout(() => {
-            chat.removeChild(chat.firstChild); // Xóa "Bot đang gõ..."
-            addMessage(reply, "bot");
-          }, 500);
-        }, 500);
-        lastInput = text.toLowerCase();
-        input.value = "";
-      } else {
-        alert("Vui lòng nhập tin nhắn!");
-      }
-    };
-
-    // Gửi tin nhắn bằng phím Enter
-    input.addEventListener("keypress", function (e) {
-      if (e.key === 'Enter') sendBtn.click();
-    });
-  </script>
+  <div class="sparkle-text">Anh tường đang bảo trì</div>
 </body>
 </html>
